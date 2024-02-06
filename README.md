@@ -14,7 +14,7 @@ To use this framework, follow these steps:
 
 1. Clone the repository to your local machine: git clone https://github.com/adeleveschetti/ChoreoPRISM.git
 
-2. Navigate to the repository directory: cd ./src/
+2. Navigate to the repository directory: cd ChoreoPRISM/src/
 
 3. Execute the code by running the `Main.java` file: java Main.java
 
