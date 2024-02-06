@@ -1,0 +1,50 @@
+preamble
+"ctmc";
+"ctmc"
+
+"const k;"
+"const T=k*1000;"
+
+"const double r = 1;"
+"const double mR = 1/600;"
+"const double lR = 1-mR;"
+
+"const double hR1 = 0.25;"
+"const double hR2 = 0.25;"
+"const double hR3 = 0.25;"
+"const double hR4 = 0.25;"
+"const double rB = 1/12.6;"
+
+"const int N = 100;"
+
+endpreamble
+
+n = 4;
+
+Hasher[i] -> i in [1...n] ;
+
+Miner[i] -> i in [1...n]
+Miner[i] : "b[i] : block {m[i],0;genesis,0} ;", "B[i] : blockchain [{genesis,0;genesis,0}];" ,"c[i] : [0..N] init 0;", "setMiner[i] : list [];" ;
+
+Network ->
+Network : "set1 : list [];", "set2 : list [];", "set3 : list [];" , "set4 : list [];"; 
+	
+{
+PoW := Miner[i] -> Hasher[i] :
+(+["hR[i]*mR"]  "(b[i]'=createB(b[i],B[i],c[i]))&(c[i]'=c[i]+1)"&&" " . 
+		Miner[i] -> Network : (["rB*1"] "(B[i]'=addBlock(B[i],b[i]))" && foreach(k != i) "(set[k]'=addBlockSet(set[k],b[i]))" @Network .PoW)
+ +["hR[i]*lR"] " " && " " .
+ 				if "!isEmpty(set[i])"@Miner[i] then { 
+  						["r"] "(b[i]'=extractBlock(set[i]))"@Miner[i] . Miner[i] -> Network : (["1*1"] "(setMiner[i]' = addBlockSet(setMiner[i] , b[i]))"&&"(set[i]' = removeBlock(set[i],b[i]))" . PoW) 
+ 				}
+ 				else{
+ 					if "canBeInserted(B[i],b[i])"@Miner[i] then { 
+ 						["1"] "(B[i]'=addBlock(B[i],b[i]))&(setMiner[i]'=removeBlock(setMiner[i],b[i]))"@Miner[i] . PoW 
+ 					}
+ 					else{
+ 						PoW
+}
+})
+} 
+  
+ 

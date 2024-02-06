@@ -1,0 +1,73 @@
+preamble
+"ctmc";
+
+"ctmc"
+
+"const int EpochSize = 2;"
+"const k = 1;"
+"const double rMw = 1/12.6;"
+"const epochs = 0;"
+"const double T;"
+"const int N = 100;"
+
+
+"const double rC = 1/(14*EpochSize);"
+"const double mR =1/14;"
+"const double hR = 10;"
+
+
+endpreamble
+
+n = 5;
+
+Validator[i] -> i in [1...n]
+Validator[i] : "b[i] : block {m[i],0;genesis,0};", "lastJ[i] : block {m[i],0;genesis,0};", "L[i] : blockchain [{genesis,0;genesis,0}];", "c[i] : [0..N] init 0;", "setMiner[i] : list [];", "heightCheckpoint[i] : [0..N] init 0;", "heightLast[i] : [0..N] init 0;", "lastFinalized[i] : block {genesis,0;genesis,0};", "lastJustified[i] : block {genesis,0;genesis,0};", "lastCheck[i] : block {genesis,0;genesis,0};", "votes[i] : [0..1000] init 0;", "listCheckpoints[i] : list [];";
+
+Network ->
+Network : "set1 : list [];", "set2 : list [];", "set3 : list [];" , "set4 : list [];" , "set5 : list [];";
+	
+Vote_Manager -> 
+Vote_Manager : "Votes : hash []; ", "tot_stake : [0..120000] init 50;", "stake1 : [0..N] init 10;", "stake2 : [0..N] init 10;", "stake3 : [0..N] init 10;", "stake4 : [0..N] init 10;", "stake5 : [0..N] init 10;";
+
+{
+PoS := Validator[i] -> Validator[i] :
+(+["mR*1"]  "(b[i]'=createB(b[i],L[i],c[i]))&(c[i]'=c[i]+1)"&&" " .
+		if "!(mod(getHeight(b[i]),EpochSize)=0)"@Validator[i] then{
+			Validator[i] -> Network : (["1*1"] "(L[i]'=addBlock(L[i],b[i]))" && foreach(k!=i) "(set[k]'=addBlockSet(set[k],b[i]))"@Network .PoS)
+		}
+		else{
+			Validator[i] -> Vote_Manager :(["1*1"] " "&&"(Votes'=addVote(Votes,b[i],stake[i]))".PoS)
+		}
+ +["hR*1"] " "&&" " . if "!isEmpty(set[i])"@Validator[i] then {
+ 				  ["1"] "(b[i]'=extractBlock(set[i]))"@Validator[i] . 
+ 				  if "!canBeInserted(L[i],b[i])"@Validator[i] then {
+ 				  															PoS
+ 				  											}
+ 				  											else{
+ 				  												Validator[i] -> Network : (["1*1"] "(setMiner[i]' = addBlockSet(setMiner[i] , b[i]))"&&"(set[i]' = removeBlock(set[i],b[i]))" . 
+ 				  												if "!(mod(getHeight(b[i]),EpochSize)=0)"@Validator[i] then {
+ 				  																 PoS
+ 				  														}
+ 				  														else{
+ 				  	 															Validator[i] -> Vote_Manager : (["1*1"] " "&&"(Votes'=addVote(Votes,b[i],stake[i]))".PoS )
+ 				  														})
+ 				  											}
+ 			}
+ 			else{
+ 				PoS
+ 			}
+ +["rC*1"] "(lastCheck[i]'=extractCheckpoint(listCheckpoints[i],lastCheck[i]))&(heightLast[i]'=getHeight(extractCheckpoint(listCheckpoints[i],lastCheck[i])))&(votes[i]'=calcVotes(Votes,extractCheckpoint(listCheckpoints[i],lastCheck[i])))"&&" " . 
+ if "(heightLast[i]=heightCheckpoint[i]+EpochSize)"@Validator[i] then{
+ 									if "(votes[i]>=2/3*tot_stake)"@Validator[i] then{
+ 										["1"] "(lastJ[i]'=b[i])&(L[i]'= updateHF(L[i],lastJ[i]))" @Validator[i].Validator[i]->Vote_Manager :(["1*1"]" "&&"(epoch'=height(lastF(L[i]))&(Stakes'=addVote(Votes,b[i],stake[i]))".PoS)
+ 									}
+ 									else{
+ 										["1"] "(lastJ[i]'=b[i])"@Validator[i] . PoS
+ 									}
+ 								}
+ 								else{
+ 									PoS
+ 								}
+ 		)
+ 								
+}
