@@ -5,7 +5,19 @@ Welcome to the ChoreoPRISM repository! This repository hosts a unified framework
 
 ## Abstract
 
-This framework introduces a simpler semantics for PRISM, enhancing its usability. Additionally, it defines a choreographic language with syntax and semantics tailored for intuitive modeling. The repository establishes the correctness of a projection function translating choreographic models to PRISM-compatible formats. Finally, it provides a compiler enabling seamless translation of choreographic models to PRISM, facilitating powerful analysis while maintaining expressive clarity. These contributions bridge the gap between high-level modeling and robust analysis in probabilistic systems.
+We present a choreographic framework for modelling and analysing
+  concurrent probabilistic systems based on the PRISM
+  model-checker. This is achieved through the development of a
+  choreography language, that is a specification language that allows
+  to describe the desired interactions within a concurrent system from
+  a global viewpoint. In particular, employing choreographies provides a clear and comprehensive view of system interactions, enabling the discernment of process flow and detection of potential errors, thus ensuring accurate execution and enhancing system reliability. We equip our language with a probabilistic semantics
+  and then define a formal encoding into the PRISM language and
+  discuss its correctness. Properties of programs written in our
+  choreographic language can be model-checked by the PRISM
+  model-checker via their translation into the PRISM language.
+  Finally, we implement a compiler for our language and demonstrate
+  its practical applicability via examples drawn from the use cases
+  featured on the PRISM website.
 
 
 ## Usage
