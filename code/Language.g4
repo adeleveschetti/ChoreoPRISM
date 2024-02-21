@@ -32,9 +32,9 @@ internalAction : SLPAR rate SRPAR message AT role DOT statement;
 
 updates : (SQLPAR (prec=actions) SQRPAR)? upds=message ;
 
-message : actions | first=DOUBLE_STRING AND loop | loop AND second=DOUBLE_STRING | loop*;
+message : actions | first=DOUBLE_STRING loop | loop second=DOUBLE_STRING | loop*;
 
-actions : (action+=DOUBLE_STRING)? (AND action+=DOUBLE_STRING)*  ;
+actions : (action+=DOUBLE_STRING)? ( action+=DOUBLE_STRING)*  ;
 
 loop : FOREACH LPAR indexIteration=index op=(EQ | LE | GE | LEQ | GEQ | NEQ ) upperBound=index RPAR DOUBLE_STRING AT role;
 
